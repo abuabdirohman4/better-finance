@@ -15,32 +15,15 @@ export function getWeeksInMonth(monthName) {
     const firstDayOfMonth = new Date(currentYear, monthIndex, 1);
     const lastDayOfMonth = new Date(currentYear, monthIndex + 1, 0);
 
-    const firstMonday = new Date(firstDayOfMonth);
-    const firstDayOfWeek = firstDayOfMonth.getDay();
-
-    const daysToFirstMonday =
-        firstDayOfWeek === 0
-            ? 1
-            : firstDayOfWeek === 1
-              ? 0
-              : 8 - firstDayOfWeek;
-    if (daysToFirstMonday > 0) {
-        firstMonday.setDate(firstDayOfMonth.getDate() + daysToFirstMonday);
-    }
-
-    if (firstMonday.getMonth() !== monthIndex) {
-        firstMonday.setTime(firstDayOfMonth.getTime());
-    }
-
-    let weekCount = 0;
-    let currentWeekStart = new Date(firstMonday);
-
-    while (currentWeekStart <= lastDayOfMonth) {
-        weekCount++;
-        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-    }
-
-    return Math.max(weekCount, 1);
+    // Calculate total days in the month
+    const totalDays = lastDayOfMonth.getDate();
+    
+    // Calculate weeks based on total days, ensuring we cover all days
+    // Each week has 7 days, so we need to account for partial weeks
+    const weeks = Math.ceil(totalDays / 7);
+    
+    // Ensure minimum 4 weeks and maximum 6 weeks for budgeting purposes
+    return Math.max(4, Math.min(6, weeks));
 }
 
 /**
@@ -67,16 +50,42 @@ export function getWeekInfo(monthName, weekNumber) {
 
     const firstDayOfMonth = new Date(currentYear, monthIndex, 1);
     const lastDayOfMonth = new Date(currentYear, monthIndex + 1, 0);
+    const totalDays = lastDayOfMonth.getDate();
 
+    // Week 1 starts from beginning of PREVIOUS month to capture all prior transactions
+    if (weekNumber === 1) {
+        // Start from the first day of the previous month
+        const weekStartDate = new Date(currentYear, monthIndex - 1, 1);
+        weekStartDate.setHours(0, 0, 0, 0);
+        
+        // Find the end of the first week (Sunday)
+        const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=Sunday, 1=Monday, etc.
+        const daysToSunday = firstDayOfWeek === 0 ? 0 : 7 - firstDayOfWeek;
+        
+        const weekEndDate = new Date(firstDayOfMonth);
+        weekEndDate.setDate(firstDayOfMonth.getDate() + daysToSunday);
+        weekEndDate.setHours(23, 59, 59, 999);
+        
+        return {
+            week: weekNumber,
+            month: monthName,
+            year: currentYear,
+            startDate: weekStartDate,
+            endDate: weekEndDate,
+        };
+    }
+
+    // For other weeks, start from Monday
     const firstMonday = new Date(firstDayOfMonth);
     const firstDayOfWeek = firstDayOfMonth.getDay();
-
+    
     const daysToFirstMonday =
         firstDayOfWeek === 0
             ? 1
             : firstDayOfWeek === 1
               ? 0
               : 8 - firstDayOfWeek;
+    
     if (daysToFirstMonday > 0) {
         firstMonday.setDate(firstDayOfMonth.getDate() + daysToFirstMonday);
     }
@@ -85,15 +94,24 @@ export function getWeekInfo(monthName, weekNumber) {
         firstMonday.setTime(firstDayOfMonth.getTime());
     }
 
+    // Calculate start date for this week (Monday)
     const weekStartDate = new Date(firstMonday);
-    weekStartDate.setDate(firstMonday.getDate() + (weekNumber - 1) * 7);
+    weekStartDate.setDate(firstMonday.getDate() + (weekNumber - 2) * 7);
     weekStartDate.setHours(0, 0, 0, 0);
 
+    // Calculate end date for this week (Sunday)
     const weekEndDate = new Date(weekStartDate);
     weekEndDate.setDate(weekStartDate.getDate() + 6);
     weekEndDate.setHours(23, 59, 59, 999);
 
-    if (weekEndDate > lastDayOfMonth) {
+    // For the last week, extend to end of NEXT month to capture all future transactions
+    const weeksInMonth = getWeeksInMonth(monthName);
+    if (weekNumber === weeksInMonth) {
+        const lastDayOfNextMonth = new Date(currentYear, monthIndex + 2, 0);
+        weekEndDate.setTime(lastDayOfNextMonth.getTime());
+        weekEndDate.setHours(23, 59, 59, 999);
+    } else if (weekEndDate > lastDayOfMonth) {
+        // For other weeks, don't exceed the last day of the month
         weekEndDate.setTime(lastDayOfMonth.getTime());
         weekEndDate.setHours(23, 59, 59, 999);
     }
