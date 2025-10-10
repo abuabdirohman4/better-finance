@@ -50,10 +50,17 @@ export function getWeeksInMonth(monthName) {
  * @returns {Object} Week information object
  */
 export function getWeekInfo(monthName, weekNumber) {
+    // Validate inputs
+    if (!monthName || !weekNumber || weekNumber < 1) {
+        console.warn('Invalid inputs to getWeekInfo:', { monthName, weekNumber });
+        return null;
+    }
+
     const currentYear = new Date().getFullYear();
     const monthIndex = months.indexOf(monthName);
 
     if (monthIndex === -1) {
+        console.warn('Invalid month name:', monthName);
         const now = new Date();
         return getCurrentWeek(now);
     }

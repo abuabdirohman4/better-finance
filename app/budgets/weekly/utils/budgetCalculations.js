@@ -23,7 +23,13 @@ export function calculateWeeklyBudgetWithPool(
     transactions,
     category
 ) {
-    if (!monthlyBudget || !allWeeksInfo || !transactions) {
+    if (!monthlyBudget || !allWeeksInfo || !Array.isArray(allWeeksInfo) || !transactions) {
+        return 0;
+    }
+
+    // Validate allWeeksInfo array
+    if (allWeeksInfo.length === 0) {
+        console.warn('Empty allWeeksInfo array');
         return 0;
     }
 
@@ -31,6 +37,10 @@ export function calculateWeeklyBudgetWithPool(
 
     // Calculate total days in all weeks
     const totalDays = allWeeksInfo.reduce((total, weekInfo) => {
+        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+            console.warn('Invalid weekInfo in allWeeksInfo:', weekInfo);
+            return total;
+        }
         const timeDiff =
             weekInfo.endDate.getTime() - weekInfo.startDate.getTime();
         const daysInWeek = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
@@ -42,6 +52,10 @@ export function calculateWeeklyBudgetWithPool(
 
     // Calculate original budget for each week based on actual days
     const originalWeeklyBudgets = allWeeksInfo.map((weekInfo) => {
+        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+            console.warn('Invalid weekInfo in originalWeeklyBudgets calculation:', weekInfo);
+            return 0;
+        }
         const timeDiff =
             weekInfo.endDate.getTime() - weekInfo.startDate.getTime();
         const daysInWeek = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
@@ -54,10 +68,21 @@ export function calculateWeeklyBudgetWithPool(
         !Array.isArray(transactions) ||
         transactions.length === 0
     ) {
+        // Validate currentWeek index before accessing
+        if (currentWeek < 1 || currentWeek > originalWeeklyBudgets.length) {
+            console.warn('Invalid currentWeek index in no transactions case:', { currentWeek, originalWeeklyBudgetsLength: originalWeeklyBudgets.length });
+            return 0;
+        }
         return originalWeeklyBudgets[currentWeek - 1] || 0;
     }
 
     const originalWeekBudget = originalWeeklyBudgets[currentWeek - 1] || 0;
+    
+    // Validate currentWeek index
+    if (currentWeek < 1 || currentWeek > allWeeksInfo.length) {
+        console.warn('Invalid currentWeek index:', { currentWeek, allWeeksInfoLength: allWeeksInfo.length });
+        return 0;
+    }
 
     if (currentWeek === 1) {
         return originalWeekBudget;
@@ -69,10 +94,17 @@ export function calculateWeeklyBudgetWithPool(
     // Calculate penalties and bonuses for each previous week
     for (let i = 0; i < currentWeek; i++) {
         const weekOriginalBudget = originalWeeklyBudgets[i] || 0;
+        const weekInfo = allWeeksInfo[i];
+        
+        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+            console.warn('Invalid weekInfo in penalty calculation:', { i, weekInfo });
+            continue;
+        }
+        
         const weekSpending = calculateWeekSpending(
             transactions,
             category,
-            allWeeksInfo[i]
+            weekInfo
         );
 
         let weekPenalty = 0;
@@ -84,6 +116,10 @@ export function calculateWeeklyBudgetWithPool(
                 const remainingDaysFromOverBudgetWeek = allWeeksInfo
                     .slice(j + 1)
                     .reduce((total, weekInfo) => {
+                        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+                            console.warn('Invalid weekInfo in penalty calculation slice:', weekInfo);
+                            return total;
+                        }
                         const timeDiff =
                             weekInfo.endDate.getTime() -
                             weekInfo.startDate.getTime();
@@ -97,9 +133,15 @@ export function calculateWeeklyBudgetWithPool(
                         ? overBudgets[j] / remainingDaysFromOverBudgetWeek
                         : 0;
 
+                const currentWeekInfo = allWeeksInfo[i];
+                if (!currentWeekInfo || !currentWeekInfo.startDate || !currentWeekInfo.endDate) {
+                    console.warn('Invalid currentWeekInfo in penalty calculation:', currentWeekInfo);
+                    continue;
+                }
+                
                 const timeDiff =
-                    allWeeksInfo[i].endDate.getTime() -
-                    allWeeksInfo[i].startDate.getTime();
+                    currentWeekInfo.endDate.getTime() -
+                    currentWeekInfo.startDate.getTime();
                 const daysInWeek =
                     Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
 
@@ -115,6 +157,10 @@ export function calculateWeeklyBudgetWithPool(
                 const remainingDaysFromUnderBudgetWeek = allWeeksInfo
                     .slice(j + 1)
                     .reduce((total, weekInfo) => {
+                        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+                            console.warn('Invalid weekInfo in bonus calculation slice:', weekInfo);
+                            return total;
+                        }
                         const timeDiff =
                             weekInfo.endDate.getTime() -
                             weekInfo.startDate.getTime();
@@ -128,9 +174,15 @@ export function calculateWeeklyBudgetWithPool(
                         ? underBudgets[j] / remainingDaysFromUnderBudgetWeek
                         : 0;
 
+                const currentWeekInfo = allWeeksInfo[i];
+                if (!currentWeekInfo || !currentWeekInfo.startDate || !currentWeekInfo.endDate) {
+                    console.warn('Invalid currentWeekInfo in bonus calculation:', currentWeekInfo);
+                    continue;
+                }
+                
                 const timeDiff =
-                    allWeeksInfo[i].endDate.getTime() -
-                    allWeeksInfo[i].startDate.getTime();
+                    currentWeekInfo.endDate.getTime() -
+                    currentWeekInfo.startDate.getTime();
                 const daysInWeek =
                     Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
 
@@ -160,6 +212,10 @@ export function calculateWeeklyBudgetWithPool(
             const remainingDaysFromOverBudgetWeek = allWeeksInfo
                 .slice(i + 1)
                 .reduce((total, weekInfo) => {
+                    if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+                        console.warn('Invalid weekInfo in current week penalty calculation slice:', weekInfo);
+                        return total;
+                    }
                     const timeDiff =
                         weekInfo.endDate.getTime() -
                         weekInfo.startDate.getTime();
@@ -174,6 +230,11 @@ export function calculateWeeklyBudgetWithPool(
                     : 0;
 
             const currentWeekInfo = allWeeksInfo[currentWeek - 1];
+            if (!currentWeekInfo || !currentWeekInfo.startDate || !currentWeekInfo.endDate) {
+                console.warn('Invalid currentWeekInfo in current week penalty calculation:', currentWeekInfo);
+                continue;
+            }
+            
             const timeDiff =
                 currentWeekInfo.endDate.getTime() -
                 currentWeekInfo.startDate.getTime();
@@ -189,6 +250,10 @@ export function calculateWeeklyBudgetWithPool(
             const remainingDaysFromUnderBudgetWeek = allWeeksInfo
                 .slice(i + 1)
                 .reduce((total, weekInfo) => {
+                    if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+                        console.warn('Invalid weekInfo in current week bonus calculation slice:', weekInfo);
+                        return total;
+                    }
                     const timeDiff =
                         weekInfo.endDate.getTime() -
                         weekInfo.startDate.getTime();
@@ -203,6 +268,11 @@ export function calculateWeeklyBudgetWithPool(
                     : 0;
 
             const currentWeekInfo = allWeeksInfo[currentWeek - 1];
+            if (!currentWeekInfo || !currentWeekInfo.startDate || !currentWeekInfo.endDate) {
+                console.warn('Invalid currentWeekInfo in current week bonus calculation:', currentWeekInfo);
+                continue;
+            }
+            
             const timeDiff =
                 currentWeekInfo.endDate.getTime() -
                 currentWeekInfo.startDate.getTime();
@@ -215,6 +285,12 @@ export function calculateWeeklyBudgetWithPool(
         }
     }
 
+    // Final validation before return
+    if (originalWeekBudget === undefined || isNaN(originalWeekBudget)) {
+        console.warn('Invalid originalWeekBudget:', originalWeekBudget);
+        return 0;
+    }
+    
     return Math.max(
         0,
         originalWeekBudget - currentWeekPenalty + currentWeekBonus

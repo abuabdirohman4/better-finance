@@ -23,8 +23,20 @@ export function useWeeklyBudgetData(
 ) {
     // Get week info for selected week
     const selectedWeekInfo = useMemo(() => {
-        return getWeekInfo(selectedMonth, selectedWeek);
-    }, [selectedMonth, selectedWeek]);
+        if (!selectedMonth || !selectedWeek || !weeksInMonth) {
+            return null;
+        }
+        
+        const weekInfo = getWeekInfo(selectedMonth, selectedWeek);
+        
+        // Validate weekInfo object
+        if (!weekInfo || !weekInfo.startDate || !weekInfo.endDate) {
+            console.warn('Invalid weekInfo returned from getWeekInfo:', { selectedMonth, selectedWeek, weekInfo });
+            return null;
+        }
+        
+        return weekInfo;
+    }, [selectedMonth, selectedWeek, weeksInMonth]);
 
     // Calculate weekly budgets and spending
     const weeklyData = useMemo(() => {
@@ -32,15 +44,18 @@ export function useWeeklyBudgetData(
             !budgetData ||
             !budgetData.spending ||
             !transactionData ||
-            !Array.isArray(transactionData)
+            !Array.isArray(transactionData) ||
+            !selectedWeekInfo
         ) {
             return [];
         }
 
         // Calculate all weeks in the month for budget distribution
-        const allWeeksInfo = Array.from({ length: weeksInMonth }, (_, i) =>
-            getWeekInfo(selectedMonth, i + 1)
-        );
+        const allWeeksInfo = Array.from({ length: weeksInMonth }, (_, i) => {
+            const weekInfo = getWeekInfo(selectedMonth, i + 1);
+            // Filter out invalid week info
+            return weekInfo && weekInfo.startDate && weekInfo.endDate ? weekInfo : null;
+        }).filter(Boolean); // Remove null entries
 
         return EATING_CATEGORIES.map((category) => {
             // Find budget for this category in spending data

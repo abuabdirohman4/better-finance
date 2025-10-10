@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTransactions, useBudgets } from "@/utils/hooks";
-import { getCurrentWeek } from "@/utils/helper";
 import { months } from "@/utils/constants";
 import { getDefaultSheetName } from "@/utils/google";
 import { processBudgetData } from "@/app/budgets/utils";
@@ -18,7 +17,7 @@ import {
 
 export default function WeeklyBudget() {
     const router = useRouter();
-    const selectedMonth = getDefaultSheetName(months);
+    const [selectedMonth, setSelectedMonth] = useState(getDefaultSheetName(months));
     const { data: budgetRawData, isLoading: budgetLoading } =
         useBudgets(selectedMonth);
     const { data: transactionData, isLoading: transactionLoading } =
@@ -88,6 +87,9 @@ export default function WeeklyBudget() {
                 selectedWeek={selectedWeek}
                 setSelectedWeek={setSelectedWeek}
                 weeksInMonth={weeksInMonth}
+                selectedMonth={selectedMonth}
+                setSelectedMonth={setSelectedMonth}
+                availableMonths={months}
             />
 
             {/* Content */}

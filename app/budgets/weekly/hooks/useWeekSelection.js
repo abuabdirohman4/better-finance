@@ -34,6 +34,14 @@ export function useWeekSelection(selectedMonth) {
         return currentWeekInfo.week;
     }, [selectedMonth, currentDate]);
 
+    // Validate and adjust selectedWeek when month changes
+    useEffect(() => {
+        // If current selectedWeek exceeds weeksInMonth, reset to last valid week
+        if (selectedWeek > weeksInMonth) {
+            setSelectedWeek(weeksInMonth > 0 ? weeksInMonth : 1);
+        }
+    }, [selectedWeek, weeksInMonth]);
+
     // Load selected week from cookies when component loads
     useEffect(() => {
         const savedWeek = Cookies.get("weekly-budget-selected-week");
@@ -52,8 +60,11 @@ export function useWeekSelection(selectedMonth) {
         // Auto-select current week when month changes or component loads (fallback)
         if (currentWeekNumber > 0 && currentWeekNumber <= weeksInMonth) {
             setSelectedWeek(currentWeekNumber);
+        } else {
+            // If current week is not valid for this month, default to week 1
+            setSelectedWeek(1);
         }
-    }, [currentWeekNumber, weeksInMonth]);
+    }, [currentWeekNumber, weeksInMonth, selectedMonth]);
 
     // Save selected week to cookies when it changes
     useEffect(() => {

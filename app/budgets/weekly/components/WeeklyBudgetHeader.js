@@ -2,7 +2,10 @@ export default function WeeklyBudgetHeader({
     currentWeek, 
     selectedWeek, 
     setSelectedWeek, 
-    weeksInMonth 
+    weeksInMonth,
+    selectedMonth,
+    setSelectedMonth,
+    availableMonths
 }) {
     return (
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 px-3 pt-5 pb-4">
@@ -29,11 +32,47 @@ export default function WeeklyBudgetHeader({
                             Weekly Budget
                         </h1>
                         <p className="text-white text-sm">
-                            {currentWeek.month} {currentWeek.year}
+                            {selectedMonth} {new Date().getFullYear()}
                         </p>
                     </div>
-                    {/* Settings and Week Selector */}
+                    {/* Settings and Selectors */}
                     <div className="flex items-center space-x-3">
+                        {/* Month Selector */}
+                        <div className="relative">
+                            <select
+                                id="month"
+                                value={selectedMonth}
+                                onChange={(e) => setSelectedMonth(e.target.value)}
+                                className="appearance-none bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-xl px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 pr-10 cursor-pointer hover:bg-white/30 transition-all duration-200"
+                            >
+                                {availableMonths.map((month) => (
+                                    <option
+                                        key={month}
+                                        value={month}
+                                        className="text-gray-800 bg-white"
+                                    >
+                                        {month}
+                                    </option>
+                                ))}
+                            </select>
+                            {/* Custom dropdown arrow */}
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                                <svg
+                                    className="w-4 h-4 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+
                         {/* Week Selector */}
                         <div className="relative">
                             <select

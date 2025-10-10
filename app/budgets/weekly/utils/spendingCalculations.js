@@ -12,6 +12,12 @@ export function calculateWeekSpending(transactions, category, currentWeek) {
         return 0;
     }
 
+    // Validate currentWeek object
+    if (!currentWeek || !currentWeek.startDate || !currentWeek.endDate) {
+        console.warn('Invalid currentWeek object:', currentWeek);
+        return 0;
+    }
+
     const filteredTransactions = transactions.filter((transaction) => {
         if (transaction.Transaction !== "Spending") return false;
         if (
