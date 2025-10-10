@@ -54,7 +54,7 @@ export function getWeekInfo(monthName, weekNumber) {
 
     // Week 1 starts from beginning of PREVIOUS month to capture all prior transactions
     if (weekNumber === 1) {
-        // Start from the first day of the previous month
+        // Transaction range: Start from the first day of the previous month
         const weekStartDate = new Date(currentYear, monthIndex - 1, 1);
         weekStartDate.setHours(0, 0, 0, 0);
         
@@ -66,12 +66,21 @@ export function getWeekInfo(monthName, weekNumber) {
         weekEndDate.setDate(firstDayOfMonth.getDate() + daysToSunday);
         weekEndDate.setHours(23, 59, 59, 999);
         
+        // Budget range: Only count days within the actual month
+        const budgetStartDate = new Date(firstDayOfMonth);
+        budgetStartDate.setHours(0, 0, 0, 0);
+        
+        const budgetEndDate = new Date(weekEndDate);
+        budgetEndDate.setHours(23, 59, 59, 999);
+        
         return {
             week: weekNumber,
             month: monthName,
             year: currentYear,
-            startDate: weekStartDate,
-            endDate: weekEndDate,
+            startDate: weekStartDate,        // For transaction filtering (extended)
+            endDate: weekEndDate,            // For transaction filtering (extended)
+            budgetStartDate: budgetStartDate, // For budget calculation (actual month)
+            budgetEndDate: budgetEndDate,     // For budget calculation (actual month)
         };
     }
 
@@ -106,21 +115,36 @@ export function getWeekInfo(monthName, weekNumber) {
 
     // For the last week, extend to end of NEXT month to capture all future transactions
     const weeksInMonth = getWeeksInMonth(monthName);
+    let budgetEndDate = new Date(weekEndDate);
+
     if (weekNumber === weeksInMonth) {
         const lastDayOfNextMonth = new Date(currentYear, monthIndex + 2, 0);
         weekEndDate.setTime(lastDayOfNextMonth.getTime());
         weekEndDate.setHours(23, 59, 59, 999);
+        
+        // Budget range: Only count days within the actual month
+        budgetEndDate = new Date(lastDayOfMonth);
+        budgetEndDate.setHours(23, 59, 59, 999);
     } else if (weekEndDate > lastDayOfMonth) {
-        // For other weeks, don't exceed the last day of the month
         weekEndDate.setTime(lastDayOfMonth.getTime());
         weekEndDate.setHours(23, 59, 59, 999);
+        budgetEndDate = new Date(weekEndDate);
     }
+
+    // Budget range: Ensure start date is within the month
+    let budgetStartDate = new Date(weekStartDate);
+    if (budgetStartDate < firstDayOfMonth) {
+        budgetStartDate = new Date(firstDayOfMonth);
+    }
+    budgetStartDate.setHours(0, 0, 0, 0);
 
     return {
         week: weekNumber,
         month: monthName,
         year: currentYear,
-        startDate: weekStartDate,
-        endDate: weekEndDate,
+        startDate: weekStartDate,        // For transaction filtering (extended)
+        endDate: weekEndDate,            // For transaction filtering (extended)
+        budgetStartDate: budgetStartDate, // For budget calculation (actual month)
+        budgetEndDate: budgetEndDate,     // For budget calculation (actual month)
     };
 }
