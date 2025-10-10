@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useAccounts } from "@/utils/hooks";
 import { formatCurrency, getTotalBalance } from "@/utils/helper";
-import AccountCard from "@/components/Card/Account";
+import { AccountWithComparison } from "@/components/Card";
 
 export default function Accounts() {
     const { data: accountData, isLoading, error } = useAccounts();
@@ -142,7 +142,7 @@ export default function Accounts() {
                 ) : accountData && accountData.length > 0 ? (
                     <div className="grid grid-cols-3 gap-3">
                         {accountData.map((account, index) => (
-                            <AccountCard key={index} account={account} />
+                            <AccountWithComparison key={index} account={account} />
                         ))}
                     </div>
                 ) : (

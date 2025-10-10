@@ -113,39 +113,12 @@ export default function AccountWithComparison({ account }) {
 
                 {/* Balance Comparison */}
                 <div className="space-y-1">
-                    {/* Data Balance */}
-                    {/* <div className="text-center">
-            <div className="text-xs text-gray-500 mb-1">Data</div>
-            <div className={`text-sm font-semibold ${isLowBalance ? 'text-red-600' : 'text-gray-700'}`}>
-              {isBankAccount ? (
-                formatCurrency(dataBalance, 'superscript')
-              ) : (
-                formatCurrency(dataBalance)
-              )}
-            </div>
-          </div> */}
-
                     {/* Difference */}
                     <div className="text-center border-t border-gray-100">
-                        {/* <div className="text-xs text-gray-500 mb-1">Difference</div> */}
-                        <div
-                            className={`text-xs font-bold flex items-center justify-center space-x-1 ${getDifferenceColor(difference)}`}
-                        >
-                            {/* <span>{getDifferenceIcon(difference)}</span> */}
+                        <div className={`text-xs font-bold flex items-center justify-center space-x-1 ${getDifferenceColor(difference)}`}>
                             <span>{formatDifference(difference)}</span>
                         </div>
                     </div>
-
-                    {/* Actual Balance */}
-                    {/* <div className="text-center">
-            <div className={`text-xs font-semibold ${isLowBalance ? 'text-red-600' : 'text-gray-700'}`}>
-              {isBankAccount ? (
-                formatCurrency(actualBalance, 'superscript')
-              ) : (
-                formatCurrency(actualBalance)
-              )}
-            </div>
-          </div> */}
                 </div>
             </div>
 
