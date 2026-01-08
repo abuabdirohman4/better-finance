@@ -14,7 +14,13 @@ export const months = [
 ];
 
 export const categories = {
-    eating: ["Dining Out", "Food", "Groceries", "Grab Credit"],
+    eating: [
+        "Dining Out", 
+        "Food", 
+        "Fruits",
+        "Groceries", 
+        "Grab Credit"
+    ],
     living: [
         "Charge",
         "Credit",

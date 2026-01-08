@@ -803,6 +803,14 @@ export default function Budgets() {
                                                                                 subCat
                                                                                     .toLowerCase()
                                                                                     .includes(
+                                                                                        "fruits"
+                                                                                    )
+                                                                            )
+                                                                                return "🍎";
+                                                                            if (
+                                                                                subCat
+                                                                                    .toLowerCase()
+                                                                                    .includes(
                                                                                         "groceries"
                                                                                     )
                                                                             )
