@@ -43,28 +43,28 @@ export function useWeekSelection(selectedMonth) {
     }, [selectedWeek, weeksInMonth]);
 
     // Load selected week from cookies when component loads
-    useEffect(() => {
-        const savedWeek = Cookies.get("weekly-budget-selected-week");
-        if (savedWeek) {
-            try {
-                const parsedWeek = parseInt(savedWeek);
-                if (parsedWeek > 0 && parsedWeek <= weeksInMonth) {
-                    setSelectedWeek(parsedWeek);
-                    return; // Don't auto-select current week if we have saved week
-                }
-            } catch (error) {
-                console.error("Error parsing saved week from cookies:", error);
-            }
-        }
+    // useEffect(() => {
+    //     const savedWeek = Cookies.get("weekly-budget-selected-week");
+    //     if (savedWeek) {
+    //         try {
+    //             const parsedWeek = parseInt(savedWeek);
+    //             if (parsedWeek > 0 && parsedWeek <= weeksInMonth) {
+    //                 setSelectedWeek(parsedWeek);
+    //                 return; // Don't auto-select current week if we have saved week
+    //             }
+    //         } catch (error) {
+    //             console.error("Error parsing saved week from cookies:", error);
+    //         }
+    //     }
 
-        // Auto-select current week when month changes or component loads (fallback)
-        if (currentWeekNumber > 0 && currentWeekNumber <= weeksInMonth) {
-            setSelectedWeek(currentWeekNumber);
-        } else {
-            // If current week is not valid for this month, default to week 1
-            setSelectedWeek(1);
-        }
-    }, [currentWeekNumber, weeksInMonth, selectedMonth]);
+    //     // Auto-select current week when month changes or component loads (fallback)
+    //     if (currentWeekNumber > 0 && currentWeekNumber <= weeksInMonth) {
+    //         setSelectedWeek(currentWeekNumber);
+    //     } else {
+    //         // If current week is not valid for this month, default to week 1
+    //         setSelectedWeek(1);
+    //     }
+    // }, [currentWeekNumber, weeksInMonth, selectedMonth]);
 
     // Save selected week to cookies when it changes
     useEffect(() => {
