@@ -407,3 +407,38 @@ export function getCurrentWeek(date) {
         endDate: endOfWeek,
     };
 }
+
+export function formatLastUpdated(isoTimestamp) {
+    if (!isoTimestamp) return null;
+
+    const date = new Date(isoTimestamp);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    // Less than 1 minute
+    if (diffInMinutes < 1) {
+        return "Just now";
+    }
+
+    // Less than 1 hour
+    if (diffInMinutes < 60) {
+        return `${diffInMinutes}m ago`;
+    }
+
+    // Less than 24 hours
+    if (diffInHours < 24) {
+        return `${diffInHours}h ago`;
+    }
+
+    // Less than 7 days
+    if (diffInDays < 7) {
+        return `${diffInDays}d ago`;
+    }
+
+    // More than 7 days - show date
+    const options = { day: "2-digit", month: "short" };
+    return date.toLocaleDateString("en-GB", options);
+}

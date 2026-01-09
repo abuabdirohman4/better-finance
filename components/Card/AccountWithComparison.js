@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/utils/helper";
+import { formatCurrency, formatLastUpdated } from "@/utils/helper";
 import { accountLogos, accountColorSchemes } from "@/utils/constants";
 import Link from "next/link";
 
@@ -114,11 +114,20 @@ export default function AccountWithComparison({ account }) {
                 {/* Balance Comparison */}
                 <div className="space-y-1">
                     {/* Difference */}
-                    <div className="text-center border-t border-gray-100">
+                    <div className="text-center border-t border-gray-100 pt-1">
                         <div className={`text-xs font-bold flex items-center justify-center space-x-1 ${getDifferenceColor(difference)}`}>
                             <span>{formatDifference(difference)}</span>
                         </div>
                     </div>
+
+                    {/* Last Updated */}
+                    {account.lastUpdated && (
+                        <div className="text-center">
+                            <div className="text-[10px]">
+                                {formatLastUpdated(account.lastUpdated)}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

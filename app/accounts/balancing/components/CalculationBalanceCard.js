@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/utils/helper";
+import { formatCurrency, formatLastUpdated } from "@/utils/helper";
 
 /**
  * Calculation balance card component
@@ -8,16 +8,18 @@ import { formatCurrency } from "@/utils/helper";
  * @param {number} props.currentBalance - Current balance
  * @param {number} props.currentBalancing - Current balancing value
  * @param {number} props.systemDifference - Calculated difference
+ * @param {string} props.lastUpdated - ISO timestamp of last update
  */
-export default function CalculationBalanceCard({ 
-    isLoading, 
-    accountName, 
-    currentBalance, 
-    currentBalancing, 
-    systemDifference 
+export default function CalculationBalanceCard({
+    isLoading,
+    accountName,
+    currentBalance,
+    currentBalancing,
+    systemDifference,
+    lastUpdated
 }) {
     const isBankAccount = accountName === "Mandiri" || accountName === "BCA";
-
+    console.log("lastUpdated", lastUpdated);
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
@@ -31,9 +33,7 @@ export default function CalculationBalanceCard({
             ) : (
                 <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                        <span className="text-gray-600">
-                            Current Balance:
-                        </span>
+                        <span className="text-gray-600">Current Balance:</span>
                         <span className="font-bold text-lg text-gray-900">
                             {isBankAccount
                                 ? formatCurrency(currentBalance, "superscript")
@@ -93,7 +93,9 @@ export default function CalculationBalanceCard({
                                             ? "Perfect Match!"
                                             : systemDifference > 0
                                               ? `+${formatCurrency(systemDifference)}`
-                                              : formatCurrency(systemDifference)}
+                                              : formatCurrency(
+                                                    systemDifference
+                                                )}
                                     </span>
                                 </div>
                                 <p className="text-xs text-gray-600 mt-1">
@@ -104,6 +106,14 @@ export default function CalculationBalanceCard({
                                           : "You have less money than recorded"}
                                 </p>
                             </div>
+                        </div>
+                    )}
+                    
+                    {lastUpdated && (
+                        <div className="text-right mt-1">
+                            <span className="text-xs">
+                                Updated {formatLastUpdated(lastUpdated)}
+                            </span>
                         </div>
                     )}
                 </div>

@@ -33,18 +33,32 @@ export async function PUT(request) {
             );
         }
 
-        // Update the balancing column (C) for the specified account
-        await googleSheetsService.updateByValue(
+        // Find the row number for the account
+        const rowNumber = await googleSheetsService.findRowByValue(
             "Summary",
             "A",
             accountName,
-            "C",
-            value,
             {
                 caseSensitive: false,
                 exactMatch: false,
             }
         );
+
+        if (!rowNumber) {
+            return Response.json(
+                { error: `Account "${accountName}" not found` },
+                { status: 404 }
+            );
+        }
+
+        // Get current timestamp in ISO format
+        const timestamp = new Date().toISOString();
+
+        // Update both balancing column (C) and last_updated column (D) for the specified account
+        await googleSheetsService.updateBatch("Summary", [
+            { range: `C${rowNumber}`, value },
+            { range: `D${rowNumber}`, value: timestamp },
+        ]);
 
         const successResponse = {
             success: true,

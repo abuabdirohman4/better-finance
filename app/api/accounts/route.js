@@ -47,6 +47,7 @@ export async function GET(request) {
                 value: parseFloat(row["Value"]) || 0,
                 balance: parseFloat(row["Value"]) || 0,
                 balancing: parseFloat(row["Balancing"]) || 0,
+                lastUpdated: row["Last Updated"] || null,
             }));
 
         const headers = {

@@ -160,6 +160,33 @@ export async function PUT(request) {
         const successful = results.filter((r) => r.success);
         const failed = results.filter((r) => !r.success);
 
+        // Update last_updated timestamp for Wallet account in Summary sheet if any updates were successful
+        if (successful.length > 0) {
+            try {
+                const walletRowNumber = await googleSheetsService.findRowByValue(
+                    "Summary",
+                    "A",
+                    "Wallet",
+                    {
+                        caseSensitive: false,
+                        exactMatch: false,
+                    }
+                );
+
+                if (walletRowNumber) {
+                    const timestamp = new Date().toISOString();
+                    await googleSheetsService.update(
+                        "Summary",
+                        `D${walletRowNumber}`,
+                        timestamp
+                    );
+                }
+            } catch (error) {
+                console.error("Error updating Wallet last_updated timestamp:", error);
+                // Don't fail the entire operation if timestamp update fails
+            }
+        }
+
         const headers = new Headers();
         headers.set("Content-Type", "application/json");
         headers.set("Cache-Control", "no-cache, no-store, must-revalidate");

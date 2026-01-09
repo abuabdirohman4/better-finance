@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAccounts } from "@/utils/hooks";
-import { formatCurrency } from "@/utils/helper";
+import { formatCurrency, formatLastUpdated } from "@/utils/helper";
 import Button from "@/components/Button";
 
 export default function WalletFractions() {
@@ -18,6 +18,7 @@ export default function WalletFractions() {
     // Find wallet account
     const walletAccount = accountData?.find((acc) => acc.name === "Wallet");
     const walletBalance = walletAccount?.balance || 0;
+    const lastUpdated = walletAccount?.lastUpdated || null;
 
     // Fetch wallet fractions data from Google Sheets
     useEffect(() => {
@@ -267,6 +268,14 @@ export default function WalletFractions() {
                                 </p>
                             </div>
                         </div>
+
+                        {lastUpdated && (
+                            <div className="text-right mt-1">
+                                <span className="text-xs">
+                                    Updated {formatLastUpdated(lastUpdated)}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

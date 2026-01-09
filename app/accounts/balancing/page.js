@@ -164,6 +164,7 @@ function AccountBalancingContent() {
                     currentBalance={currentBalance}
                     currentBalancing={currentBalancing}
                     systemDifference={systemDifference}
+                    lastUpdated={account?.lastUpdated}
                 />
 
                 {/* Reality Check Form */}
