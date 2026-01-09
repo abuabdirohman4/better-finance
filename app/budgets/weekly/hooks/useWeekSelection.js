@@ -2,19 +2,15 @@ import { useState, useEffect, useMemo } from "react";
 import { months } from "@/utils/constants";
 import { getCurrentWeek } from "@/utils/helper";
 import { getWeeksInMonth } from "../utils/dateCalculations";
-import Cookies from "js-cookie";
 
 /**
- * Custom hook for managing week selection with cookie persistence
+ * Custom hook for managing week selection
+ * Auto-selects current week on every refresh
  * @param {string} selectedMonth - Currently selected month
  * @returns {Object} Week selection state and utilities
  */
 export function useWeekSelection(selectedMonth) {
     const [selectedWeek, setSelectedWeek] = useState(1);
-    
-    // Get current week info
-    const currentDate = useMemo(() => new Date(), []);
-    const currentWeek = getCurrentWeek(currentDate);
 
     // Calculate weeks in selected month
     const weeksInMonth = useMemo(() => {
@@ -23,56 +19,57 @@ export function useWeekSelection(selectedMonth) {
 
     // Get current week number for the selected month
     const currentWeekNumber = useMemo(() => {
-        // Check if current date is in the selected month
+        const now = new Date();
         const currentMonthIndex = months.indexOf(selectedMonth);
-        if (currentDate.getMonth() !== currentMonthIndex) {
-            return 1; // If not in the selected month, default to week 1
+        const currentYear = now.getFullYear();
+
+        // If not viewing current month, default to week 1
+        if (now.getMonth() !== currentMonthIndex) {
+            return 1;
         }
 
-        // Use existing getCurrentWeek function
-        const currentWeekInfo = getCurrentWeek(currentDate);
-        return currentWeekInfo.week;
-    }, [selectedMonth, currentDate]);
+        // Calculate which week of the month we're in
+        const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1);
+        const currentDay = now.getDate();
 
-    // Validate and adjust selectedWeek when month changes
-    useEffect(() => {
-        // If current selectedWeek exceeds weeksInMonth, reset to last valid week
-        if (selectedWeek > weeksInMonth) {
-            setSelectedWeek(weeksInMonth > 0 ? weeksInMonth : 1);
+        // Find first Monday of the month
+        const firstDayOfWeek = firstDayOfMonth.getDay();
+        const daysToFirstMonday =
+            firstDayOfWeek === 0 ? 1 :
+            firstDayOfWeek === 1 ? 0 :
+            8 - firstDayOfWeek;
+
+        const firstMonday = new Date(firstDayOfMonth);
+        firstMonday.setDate(firstDayOfMonth.getDate() + daysToFirstMonday);
+
+        // If we're before the first Monday, we're in week 1
+        if (now < firstMonday) {
+            return 1;
         }
-    }, [selectedWeek, weeksInMonth]);
 
-    // Load selected week from cookies when component loads
-    // useEffect(() => {
-    //     const savedWeek = Cookies.get("weekly-budget-selected-week");
-    //     if (savedWeek) {
-    //         try {
-    //             const parsedWeek = parseInt(savedWeek);
-    //             if (parsedWeek > 0 && parsedWeek <= weeksInMonth) {
-    //                 setSelectedWeek(parsedWeek);
-    //                 return; // Don't auto-select current week if we have saved week
-    //             }
-    //         } catch (error) {
-    //             console.error("Error parsing saved week from cookies:", error);
-    //         }
-    //     }
+        // Calculate week number from first Monday
+        const daysSinceFirstMonday = currentDay - firstMonday.getDate();
+        const weekNumber = Math.floor(daysSinceFirstMonday / 7) + 2; // +2 because week 1 is before first Monday
 
-    //     // Auto-select current week when month changes or component loads (fallback)
-    //     if (currentWeekNumber > 0 && currentWeekNumber <= weeksInMonth) {
-    //         setSelectedWeek(currentWeekNumber);
-    //     } else {
-    //         // If current week is not valid for this month, default to week 1
-    //         setSelectedWeek(1);
-    //     }
-    // }, [currentWeekNumber, weeksInMonth, selectedMonth]);
+        // Ensure week number doesn't exceed total weeks in month
+        return Math.min(weekNumber, weeksInMonth);
+    }, [selectedMonth, weeksInMonth]);
 
-    // Save selected week to cookies when it changes
+    // Get current week info for legacy compatibility
+    const currentWeek = useMemo(() => {
+        return getCurrentWeek(new Date());
+    }, []);
+
+    // Auto-select current week on component mount and when month changes
     useEffect(() => {
-        Cookies.set("weekly-budget-selected-week", selectedWeek.toString(), {
-            expires: 365,
-            sameSite: "strict",
-        });
-    }, [selectedWeek]);
+        // Auto-select current week when month changes or component loads
+        if (currentWeekNumber > 0 && currentWeekNumber <= weeksInMonth) {
+            setSelectedWeek(currentWeekNumber);
+        } else {
+            // If current week is not valid for this month, default to week 1
+            setSelectedWeek(1);
+        }
+    }, [currentWeekNumber, weeksInMonth, selectedMonth]);
 
     return {
         selectedWeek,
