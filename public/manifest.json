@@ -6,11 +6,17 @@
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#f8fafc",
-  "orientation": "any",
-  "categories": ["finance", "productivity", "utilities"],
+  "orientation": "portrait",
+  "categories": [
+    "finance",
+    "productivity",
+    "utilities"
+  ],
   "lang": "en",
   "scope": "/",
-  "display_override": ["window-controls-overlay"],
+  "display_override": [
+    "window-controls-overlay"
+  ],
   "icons": [
     {
       "src": "/img/logo.svg",
