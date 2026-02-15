@@ -15,13 +15,24 @@ export function getWeeksInMonth(monthName) {
     const firstDayOfMonth = new Date(currentYear, monthIndex, 1);
     const lastDayOfMonth = new Date(currentYear, monthIndex + 1, 0);
 
-    // Calculate total days in the month
-    const totalDays = lastDayOfMonth.getDate();
-    
-    // Calculate weeks based on total days, ensuring we cover all days
-    // Each week has 7 days, so we need to account for partial weeks
-    const weeks = Math.ceil(totalDays / 7);
-    
+    // Calculate weeks based on calendar alignment (Mon-Sun weeks)
+    let weeks = 0;
+    let current = new Date(firstDayOfMonth);
+
+    // While current date is within the month
+    while (current <= lastDayOfMonth) {
+        weeks++;
+
+        // Find the day of the week (0 = Sunday, 1 = Monday, etc.)
+        const dayOfWeek = current.getDay();
+
+        // Calculate days until the next Sunday (end of the current week)
+        const daysToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+        // Advance current date to the start of the next week (Monday)
+        current.setDate(current.getDate() + daysToSunday + 1);
+    }
+
     // Ensure minimum 4 weeks and maximum 6 weeks for budgeting purposes
     return Math.max(4, Math.min(6, weeks));
 }
@@ -57,22 +68,22 @@ export function getWeekInfo(monthName, weekNumber) {
         // Transaction range: Start from the first day of the previous month
         const weekStartDate = new Date(currentYear, monthIndex - 1, 1);
         weekStartDate.setHours(0, 0, 0, 0);
-        
+
         // Find the end of the first week (Sunday)
         const firstDayOfWeek = firstDayOfMonth.getDay(); // 0=Sunday, 1=Monday, etc.
         const daysToSunday = firstDayOfWeek === 0 ? 0 : 7 - firstDayOfWeek;
-        
+
         const weekEndDate = new Date(firstDayOfMonth);
         weekEndDate.setDate(firstDayOfMonth.getDate() + daysToSunday);
         weekEndDate.setHours(23, 59, 59, 999);
-        
+
         // Budget range: Only count days within the actual month
         const budgetStartDate = new Date(firstDayOfMonth);
         budgetStartDate.setHours(0, 0, 0, 0);
-        
+
         const budgetEndDate = new Date(weekEndDate);
         budgetEndDate.setHours(23, 59, 59, 999);
-        
+
         return {
             week: weekNumber,
             month: monthName,
@@ -87,14 +98,14 @@ export function getWeekInfo(monthName, weekNumber) {
     // For other weeks, start from Monday
     const firstMonday = new Date(firstDayOfMonth);
     const firstDayOfWeek = firstDayOfMonth.getDay();
-    
+
     const daysToFirstMonday =
         firstDayOfWeek === 0
             ? 1
             : firstDayOfWeek === 1
-              ? 0
-              : 8 - firstDayOfWeek;
-    
+                ? 0
+                : 8 - firstDayOfWeek;
+
     if (daysToFirstMonday > 0) {
         firstMonday.setDate(firstDayOfMonth.getDate() + daysToFirstMonday);
     }
@@ -121,7 +132,7 @@ export function getWeekInfo(monthName, weekNumber) {
         const lastDayOfNextMonth = new Date(currentYear, monthIndex + 2, 0);
         weekEndDate.setTime(lastDayOfNextMonth.getTime());
         weekEndDate.setHours(23, 59, 59, 999);
-        
+
         // Budget range: Only count days within the actual month
         budgetEndDate = new Date(lastDayOfMonth);
         budgetEndDate.setHours(23, 59, 59, 999);
