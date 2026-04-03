@@ -417,6 +417,9 @@ export function formatLastUpdated(isoTimestamp) {
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInDays / 365);
 
     // Less than 1 minute
     if (diffInMinutes < 1) {
@@ -438,7 +441,17 @@ export function formatLastUpdated(isoTimestamp) {
         return `${diffInDays}d ago`;
     }
 
-    // More than 7 days - show date
-    const options = { day: "2-digit", month: "short" };
-    return date.toLocaleDateString("en-GB", options);
+    // More than 7 days - show both relative time and date
+    const options = { day: "2-digit", month: "short", ...(diffInYears > 0 && { year: "numeric" }) };
+    const dateStr = date.toLocaleDateString("en-GB", options);
+
+    if (diffInDays < 30) {
+        return `${diffInWeeks}w ago (${dateStr})`;
+    }
+
+    if (diffInDays < 365) {
+        return `${diffInMonths}mo ago (${dateStr})`;
+    }
+
+    return `${diffInYears}y ago (${dateStr})`;
 }
