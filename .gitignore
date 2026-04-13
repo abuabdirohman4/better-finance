@@ -38,3 +38,7 @@ next-env.d.ts
 
 # Beads issue tracker
 .beads/beads.db
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

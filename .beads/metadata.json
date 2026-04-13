@@ -1,4 +1,7 @@
 {
-  "database": "beads.db",
-  "jsonl_export": "issues.jsonl"
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "prj_better_finance",
+  "project_id": "7ef65967-862a-4932-9e34-fd69abbf87b2"
 }
